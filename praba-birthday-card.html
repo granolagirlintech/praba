@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>For Praba</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Quicksand:wght@400;500;600;700&display=swap');
+
+  :root{
+    --pink: #ff6f9c;
+    --pink-deep: #e0507a;
+    --pink-soft: #ffd6e5;
+    --yellow: #ffc94d;
+    --yellow-soft: #fff0c6;
+    --cream: #fffaf3;
+    --ink: #4a3b3f;
+    --ink-soft: #9a8286;
+  }
+
+  *{ box-sizing: border-box; margin:0; padding:0; }
+
+  body{
+    font-family: 'Quicksand', sans-serif;
+    background: radial-gradient(circle at 50% 20%, #fff4f7 0%, var(--cream) 55%, #fdf0e6 100%);
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+    padding: 24px;
+  }
+
+  /* ambient floating petals */
+  .petal{
+    position: fixed;
+    top: 100%;
+    pointer-events: none;
+    border-radius: 50% 0 50% 50%;
+    opacity: 0.55;
+    animation: drift linear infinite;
+    z-index: 0;
+  }
+  @keyframes drift{
+    0%{ transform: translateY(0) rotate(0deg); opacity:0; }
+    10%{ opacity:0.55; }
+    90%{ opacity:0.4; }
+    100%{ transform: translateY(-115vh) rotate(340deg); opacity:0; }
+  }
+
+  .card{
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 420px;
+    min-height: 480px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .stage{
+    display: none;
+    width: 100%;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    animation: rise 0.6s ease both;
+  }
+  .stage.active{ display: flex; }
+
+  @keyframes rise{
+    from{ opacity: 0; transform: translateY(14px); }
+    to{ opacity: 1; transform: translateY(0); }
+  }
+
+  /* ---------- STAGE 1: ENVELOPE ---------- */
+  .envelope-label{
+    font-family: 'Caveat', cursive;
+    font-size: 1.5rem;
+    color: var(--pink-deep);
+    margin-bottom: 22px;
+  }
+  .envelope{
+    position: relative;
+    width: 260px;
+    height: 170px;
+    cursor: pointer;
+  }
+  .env-body{
+    position: absolute;
+    inset: 0;
+    background: var(--pink-soft);
+    border-radius: 6px 6px 10px 10px;
+    box-shadow: 0 16px 34px rgba(224,80,122,0.22);
+    overflow: hidden;
+  }
+  .env-body::before,
+  .env-body::after{
+    content: "";
+    position: absolute;
+    bottom: 0;
+    width: 0; height: 0;
+    border-style: solid;
+  }
+  .env-body::before{
+    left: 0;
+    border-width: 0 0 90px 130px;
+    border-color: transparent transparent rgba(255,255,255,0.35) transparent;
+  }
+  .env-body::after{
+    right: 0;
+    border-width: 90px 130px 0 0;
+    border-color: transparent transparent transparent rgba(255,255,255,0.2);
+  }
+  .env-flap{
+    position: absolute;
+    top: 0; left: 0;
+    width: 0; height: 0;
+    border-left: 130px solid transparent;
+    border-right: 130px solid transparent;
+    border-top: 95px solid var(--pink);
+    transform-origin: top center;
+    transition: transform 0.65s cubic-bezier(.6,-0.28,.74,.05);
+    z-index: 3;
+  }
+  .envelope.open .env-flap{
+    transform: rotateX(180deg);
+  }
+  .env-letter{
+    position: absolute;
+    left: 20px; right: 20px;
+    bottom: 10px;
+    height: 120px;
+    background: var(--cream);
+    border-radius: 4px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Caveat', cursive;
+    font-size: 1.6rem;
+    color: var(--pink-deep);
+    transition: transform 0.7s ease 0.15s, opacity 0.7s ease 0.15s;
+    z-index: 2;
+    padding: 12px;
+  }
+  .envelope.open .env-letter{
+    transform: translateY(-58px);
+  }
+  .envelope-hint{
+    margin-top: 20px;
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+    letter-spacing: 0.02em;
+  }
+
+  /* ---------- STAGE 2: HEART CURVE ---------- */
+  #heart-svg{ width: 280px; height: 280px; }
+  .heart-letter{
+    font-family: 'Caveat', cursive;
+    font-weight: 700;
+    font-size: 30px;
+    fill: var(--pink-deep);
+    opacity: 0;
+    transition: opacity 0.6s ease, transform 0.6s ease;
+    transform: translateY(6px);
+  }
+  .heart-letter.show{ opacity: 1; transform: translateY(0); }
+
+  .continue-btn{
+    margin-top: 18px;
+    border: none;
+    background: var(--pink);
+    color: white;
+    font-family: 'Quicksand', sans-serif;
+    font-weight: 600;
+    font-size: 0.95rem;
+    padding: 11px 26px;
+    border-radius: 999px;
+    cursor: pointer;
+    box-shadow: 0 8px 18px rgba(255,111,156,0.35);
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.5s ease, transform 0.5s ease, background 0.2s ease;
+  }
+  .continue-btn.show{ opacity: 1; transform: translateY(0); }
+  .continue-btn:hover{ background: var(--pink-deep); }
+
+  /* ---------- STAGE 3: FLOWERS ---------- */
+  .message{
+    font-family: 'Caveat', cursive;
+    font-size: 1.55rem;
+    line-height: 1.5;
+    color: var(--ink);
+    max-width: 340px;
+    min-height: 150px;
+  }
+  .message .line{ display: block; opacity: 0; }
+  .message .line.show{ opacity: 1; }
+  .cursor{
+    display: inline-block;
+    width: 2px;
+    background: var(--pink-deep);
+    margin-left: 2px;
+    animation: blink 0.9s steps(1) infinite;
+  }
+  @keyframes blink{ 50%{ opacity: 0; } }
+
+  .flower-row{
+    display: flex;
+    gap: 22px;
+    align-items: flex-end;
+    margin-top: 28px;
+    height: 100px;
+  }
+  .flower{
+    width: 64px; height: 64px;
+    opacity: 0;
+    transform: scale(0.2) translateY(10px);
+    transition: opacity 0.55s ease, transform 0.55s cubic-bezier(.34,1.56,.64,1);
+  }
+  .flower.bloom{ opacity: 1; transform: scale(1) translateY(0); }
+  .petal-shape{ fill: var(--pink); }
+
+  .finale{
+    margin-top: 26px;
+    font-family: 'Caveat', cursive;
+    font-size: 1.9rem;
+    color: var(--pink-deep);
+    opacity: 0;
+    transition: opacity 0.8s ease;
+  }
+  .finale.show{ opacity: 1; }
+
+  .replay-btn{
+    margin-top: 22px;
+    background: none;
+    border: 1px solid var(--pink-soft);
+    color: var(--ink-soft);
+    font-family: 'Quicksand', sans-serif;
+    font-size: 0.8rem;
+    padding: 8px 18px;
+    border-radius: 999px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.8s ease, border-color 0.2s ease, color 0.2s ease;
+  }
+  .replay-btn.show{ opacity: 1; }
+  .replay-btn:hover{ border-color: var(--pink); color: var(--pink-deep); }
+</style>
+</head>
+<body>
+
+<div class="card">
+
+  <!-- STAGE 1 -->
+  <div class="stage active" id="stage-envelope">
+    <div class="envelope-label">for Praba 🩷</div>
+    <div class="envelope" id="envelope">
+      <div class="env-letter">tap to open</div>
+      <div class="env-body"></div>
+      <div class="env-flap"></div>
+    </div>
+    <div class="envelope-hint">go on, open it</div>
+  </div>
+
+  <!-- STAGE 2 -->
+  <div class="stage" id="stage-heart">
+    <svg id="heart-svg" viewBox="0 0 300 300"></svg>
+    <button class="continue-btn" id="btn-to-flowers">keep going →</button>
+  </div>
+
+  <!-- STAGE 3 -->
+  <div class="stage" id="stage-flowers">
+    <p class="message" id="message"></p>
+    <div class="flower-row">
+      <svg class="flower" id="flower-pink" viewBox="0 0 100 100"></svg>
+      <svg class="flower" id="flower-yellow" viewBox="0 0 100 100"></svg>
+      <svg class="flower" id="flower-white" viewBox="0 0 100 100"></svg>
+    </div>
+    <div class="finale" id="finale">Happy 25th birthday, Praba 🎂</div>
+    <button class="replay-btn" id="btn-replay">play it again</button>
+  </div>
+
+</div>
+
+<script>
+/* ---------------- ambient petals ---------------- */
+(function ambientPetals(){
+  const colors = ['var(--pink)','var(--yellow)','#ffffff'];
+  const count = 9;
+  for(let i=0;i<count;i++){
+    const p = document.createElement('div');
+    p.className = 'petal';
+    const size = 8 + Math.random()*10;
+    p.style.width = size+'px';
+    p.style.height = size+'px';
+    p.style.left = Math.random()*100+'vw';
+    p.style.background = colors[i % colors.length];
+    p.style.animationDuration = (10 + Math.random()*8)+'s';
+    p.style.animationDelay = (Math.random()*10)+'s';
+    document.body.appendChild(p);
+  }
+})();
+
+/* ---------------- stage control ---------------- */
+function goTo(id){
+  document.querySelectorAll('.stage').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+/* ---------------- STAGE 1: envelope ---------------- */
+const envelope = document.getElementById('envelope');
+envelope.addEventListener('click', () => {
+  if(envelope.classList.contains('open')) return;
+  envelope.classList.add('open');
+  setTimeout(() => {
+    goTo('stage-heart');
+    drawHeart();
+  }, 1300);
+});
+
+/* ---------------- STAGE 2: heart curve spelling PRABA ---------------- */
+function drawHeart(){
+  const svg = document.getElementById('heart-svg');
+  svg.innerHTML = '';
+  const cx = 150, cy = 155, scale = 8.2;
+  const points = [];
+  const steps = 260;
+  for(let i=0;i<=steps;i++){
+    const t = (i/steps) * Math.PI * 2;
+    const x = 16 * Math.pow(Math.sin(t), 3);
+    const y = 13*Math.cos(t) - 5*Math.cos(2*t) - 2*Math.cos(3*t) - Math.cos(4*t);
+    points.push([cx + x*scale, cy - y*scale]);
+  }
+  let d = 'M ' + points.map(p => p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' L ');
+
+  const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+  path.setAttribute('d', d);
+  path.setAttribute('fill', 'none');
+  path.setAttribute('stroke', 'var(--pink-deep)');
+  path.setAttribute('stroke-width', '3');
+  path.setAttribute('stroke-linecap', 'round');
+  svg.appendChild(path);
+
+  const len = path.getTotalLength();
+  path.style.strokeDasharray = len;
+  path.style.strokeDashoffset = len;
+  path.getBoundingClientRect(); // force reflow
+  path.style.transition = 'stroke-dashoffset 2.1s ease';
+  requestAnimationFrame(() => { path.style.strokeDashoffset = 0; });
+
+  // letters PRABA placed evenly around the curve
+  const word = ['P','r','a','b','a'];
+  const letterEls = [];
+  word.forEach((ch, i) => {
+    const t = -Math.PI/2 + i * (Math.PI*2/word.length);
+    const x = 16 * Math.pow(Math.sin(t), 3);
+    const y = 13*Math.cos(t) - 5*Math.cos(2*t) - 2*Math.cos(3*t) - Math.cos(4*t);
+    const text = document.createElementNS('http://www.w3.org/2000/svg','text');
+    text.setAttribute('x', cx + x*scale);
+    text.setAttribute('y', cy - y*scale);
+    text.setAttribute('text-anchor','middle');
+    text.setAttribute('class','heart-letter');
+    text.textContent = ch;
+    svg.appendChild(text);
+    letterEls.push(text);
+  });
+
+  setTimeout(() => {
+    letterEls.forEach((el, i) => {
+      setTimeout(() => el.classList.add('show'), i*180);
+    });
+    setTimeout(() => {
+      document.getElementById('btn-to-flowers').classList.add('show');
+    }, letterEls.length*180 + 300);
+  }, 2100);
+}
+
+document.getElementById('btn-to-flowers').addEventListener('click', () => {
+  goTo('stage-flowers');
+  runFlowerStage();
+});
+
+/* ---------------- STAGE 3: message + flowers ---------------- */
+const lines = [
+  "I don't know what your favorite flower is yet...",
+  "But I do remember your favorite colors are Pink, Yellow, and White...",
+  "you've said this exactly in chronological order hahaha.",
+  "But anywayy,, here's the flowers for you.",
+  "I hope you like it."
+];
+
+function flowerSvg(color, centerColor){
+  return `
+    <g transform="translate(50,50)">
+      ${[0,72,144,216,288].map(a => `
+        <ellipse class="petal-shape" cx="0" cy="-20" rx="11" ry="20"
+          fill="${color}" transform="rotate(${a})"/>
+      `).join('')}
+      <circle cx="0" cy="0" r="10" fill="${centerColor}"/>
+    </g>`;
+}
+
+let flowerStageStarted = false;
+function runFlowerStage(){
+  if(flowerStageStarted) return;
+  flowerStageStarted = true;
+
+  document.getElementById('flower-pink').innerHTML   = flowerSvg('var(--pink)', 'var(--yellow)');
+  document.getElementById('flower-yellow').innerHTML = flowerSvg('var(--yellow)', '#ffffff');
+  document.getElementById('flower-white').innerHTML  = flowerSvg('#ffffff', 'var(--yellow)');
+  document.getElementById('flower-white').style.setProperty('--stroke','#e8d9c5');
+
+  const msgEl = document.getElementById('message');
+  msgEl.innerHTML = '';
+  let lineIndex = 0;
+
+  function typeLine(text, el, cb){
+    let i = 0;
+    const cursor = document.createElement('span');
+    cursor.className = 'cursor';
+    el.appendChild(document.createTextNode(''));
+    el.appendChild(cursor);
+    const interval = setInterval(() => {
+      cursor.insertAdjacentText('beforebegin', text[i]);
+      i++;
+      if(i >= text.length){
+        clearInterval(interval);
+        cursor.remove();
+        setTimeout(cb, 420);
+      }
+    }, 28);
+  }
+
+  function nextLine(){
+    if(lineIndex >= lines.length){
+      setTimeout(showFlowers, 300);
+      return;
+    }
+    const lineEl = document.createElement('span');
+    lineEl.className = 'line show';
+    msgEl.appendChild(lineEl);
+    typeLine(lines[lineIndex], lineEl, () => {
+      lineIndex++;
+      nextLine();
+    });
+  }
+  nextLine();
+
+  function showFlowers(){
+    const order = ['flower-pink','flower-yellow','flower-white'];
+    order.forEach((id,i) => {
+      setTimeout(() => document.getElementById(id).classList.add('bloom'), i*550);
+    });
+    setTimeout(() => {
+      document.getElementById('finale').classList.add('show');
+      document.getElementById('btn-replay').classList.add('show');
+    }, order.length*550 + 400);
+  }
+}
+
+document.getElementById('btn-replay').addEventListener('click', () => {
+  envelope.classList.remove('open');
+  document.getElementById('message').innerHTML = '';
+  document.querySelectorAll('.flower').forEach(f => f.classList.remove('bloom'));
+  document.getElementById('finale').classList.remove('show');
+  document.getElementById('btn-replay').classList.remove('show');
+  document.getElementById('btn-to-flowers').classList.remove('show');
+  flowerStageStarted = false;
+  goTo('stage-envelope');
+});
+</script>
+
+</body>
+</html>
